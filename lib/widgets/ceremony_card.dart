@@ -6,7 +6,20 @@ import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 
 // Provider to track if the user has clicked the ceremony card in this session
-final hasClickedCeremonyProvider = StateProvider<bool>((ref) => false);
+class HasClickedCeremonyNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    return false;
+  }
+
+  void setClicked() {
+    state = true;
+  }
+}
+
+final hasClickedCeremonyProvider = NotifierProvider<HasClickedCeremonyNotifier, bool>(() {
+  return HasClickedCeremonyNotifier();
+});
 
 class CeremonyCard extends ConsumerStatefulWidget {
   const CeremonyCard({super.key});
@@ -59,7 +72,7 @@ class _CeremonyCardState extends ConsumerState<CeremonyCard> with SingleTickerPr
         GestureDetector(
           onTap: () {
             if (!hasClicked) {
-              ref.read(hasClickedCeremonyProvider.notifier).state = true;
+              ref.read(hasClickedCeremonyProvider.notifier).setClicked();
             }
             Get.toNamed(AppRoutes.INVITATION);
           },
