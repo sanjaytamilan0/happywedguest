@@ -5,11 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'providers/nav_provider.dart';
 import 'widgets/top_nav.dart';
-import 'widgets/bottom_action_bar.dart';
 import 'views/home_view.dart';
 import 'views/profile_view.dart';
 import 'views/gallery_view.dart';
-import 'views/under_construction_view.dart';
+import 'views/links_view.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -17,7 +16,6 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentTab = ref.watch(navTabProvider);
-    final showBottomBar = currentTab == NavTab.home;
 
     return Scaffold(
       body: LayoutBuilder(
@@ -28,11 +26,11 @@ class HomePage extends ConsumerWidget {
             children: [
               // Main Scrollable Content
               SingleChildScrollView(
-                padding: EdgeInsets.only(
+                padding: const EdgeInsets.only(
                   left: 24,
                   right: 24,
                   top: 48,
-                  bottom: showBottomBar ? 120 : 48, // space for bottom action bar
+                  bottom: 48, // space for bottom action bar removed
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -54,7 +52,7 @@ class HomePage extends ConsumerWidget {
                           case NavTab.gallery:
                             return GalleryView(isDesktop: isDesktop);
                           case NavTab.links:
-                            return const UnderConstructionView();
+                            return LinksView(isDesktop: isDesktop);
                           case NavTab.home:
                             return HomeView(isDesktop: isDesktop);
                         }
@@ -63,15 +61,6 @@ class HomePage extends ConsumerWidget {
                   ],
                 ),
               ),
-
-              // Sticky Bottom Action Bar
-              if (showBottomBar)
-                const Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: BottomActionBar(),
-                ),
             ],
           );
         },

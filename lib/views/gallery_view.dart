@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'media_full_screen_view.dart';
+
+enum GalleryCategory { pictures, video, album }
 
 class GalleryView extends StatefulWidget {
   final bool isDesktop;
@@ -11,6 +16,7 @@ class GalleryView extends StatefulWidget {
 }
 
 class _GalleryViewState extends State<GalleryView> {
+  GalleryCategory _selectedCategory = GalleryCategory.pictures;
   String? _selectedFolder;
 
   final List<String> _folders = [
@@ -24,80 +30,225 @@ class _GalleryViewState extends State<GalleryView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_selectedFolder == null) {
-      return _buildFoldersGrid();
-    } else {
-      return _buildMediaGrid();
-    }
-  }
-
-  Widget _buildFoldersGrid() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Gallery',
-          style: GoogleFonts.lora(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 24),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: widget.isDesktop ? 3 : 2,
-            childAspectRatio: 1.0,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: _folders.length,
-          itemBuilder: (context, index) {
-            final folder = _folders[index];
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedFolder = folder;
-                });
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.folder,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      folder,
-                      style: GoogleFonts.montserrat(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+        _buildCategorySelector(),
+        const SizedBox(height: 32),
+        _buildDynamicContent(),
       ],
+    );
+  }
+
+  Widget _buildCategorySelector() {
+    return Row(
+      children: [
+        _buildCategoryBox('Pictures', GalleryCategory.pictures),
+        const SizedBox(width: 12),
+        _buildCategoryBox('Video', GalleryCategory.video),
+        const SizedBox(width: 12),
+        _buildCategoryBox('Album', GalleryCategory.album),
+      ],
+    );
+  }
+
+  Widget _buildCategoryBox(String title, GalleryCategory category) {
+    final isSelected = _selectedCategory == category;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedCategory = category;
+            if (category != GalleryCategory.album) {
+              _selectedFolder = null; // Clear folder if navigating away from album
+            }
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            color: isSelected ? Theme.of(context).colorScheme.primary : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected ? Colors.transparent : Colors.grey.withAlpha(51),
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary.withAlpha(76),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : [],
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: GoogleFonts.montserrat(
+                fontWeight: FontWeight.bold,
+                color: isSelected ? Colors.white : Colors.black87,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDynamicContent() {
+    switch (_selectedCategory) {
+      case GalleryCategory.pictures:
+        return _buildPicturesGrid();
+      case GalleryCategory.video:
+        return _buildVideosGrid();
+      case GalleryCategory.album:
+        if (_selectedFolder == null) {
+          return _buildFoldersGrid();
+        } else {
+          return _buildMediaGrid();
+        }
+    }
+  }
+
+  Widget _buildPicturesGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: widget.isDesktop ? 4 : 2,
+        childAspectRatio: 1.0,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemCount: 12, // Placeholder count
+      itemBuilder: (context, index) {
+        final url = 'https://picsum.photos/seed/allpics$index/800/800';
+        return GestureDetector(
+          onTap: () => Get.dialog(MediaFullScreenView(url: url, isVideo: false), useSafeArea: false),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              'https://picsum.photos/seed/allpics$index/400/400',
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Skeletonizer(
+                  enabled: true,
+                  child: Container(color: Colors.grey[300]),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildVideosGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: widget.isDesktop ? 3 : 2,
+        childAspectRatio: 1.0,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: 6, // Placeholder count
+      itemBuilder: (context, index) {
+        // Since picsum doesn't host real videos, using a reliable sample video for the full view
+        // while keeping the picsum thumbnail
+        final videoUrl = 'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4';
+        return GestureDetector(
+          onTap: () => Get.dialog(MediaFullScreenView(url: videoUrl, isVideo: true), useSafeArea: false),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  'https://picsum.photos/seed/allvideos$index/400/400',
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Skeletonizer(
+                      enabled: true,
+                      child: Container(color: Colors.grey[300]),
+                    );
+                  },
+                ),
+                Container(
+                  color: Colors.black.withOpacity(0.3),
+                  child: const Center(
+                    child: Icon(
+                      Icons.play_circle_fill,
+                      color: Colors.white,
+                      size: 64,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFoldersGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: widget.isDesktop ? 3 : 2,
+        childAspectRatio: 1.0,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: _folders.length,
+      itemBuilder: (context, index) {
+        final folder = _folders[index];
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedFolder = folder;
+            });
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(13),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.folder,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.primary.withAlpha(204),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  folder,
+                  style: GoogleFonts.montserrat(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -140,24 +291,21 @@ class _GalleryViewState extends State<GalleryView> {
           ),
           itemCount: 8, // Placeholder count
           itemBuilder: (context, index) {
+            final url = 'https://picsum.photos/seed/${_selectedFolder!.replaceAll(' ', '')}$index/800/800';
             return GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Under construction'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      'https://picsum.photos/seed/${_selectedFolder!.replaceAll(' ', '')}$index/400/400',
-                    ),
-                    fit: BoxFit.cover,
-                  ),
+              onTap: () => Get.dialog(MediaFullScreenView(url: url, isVideo: false), useSafeArea: false),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  'https://picsum.photos/seed/${_selectedFolder!.replaceAll(' ', '')}$index/400/400',
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Skeletonizer(
+                      enabled: true,
+                      child: Container(color: Colors.grey[300]),
+                    );
+                  },
                 ),
               ),
             );

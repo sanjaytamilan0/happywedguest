@@ -5,15 +5,15 @@ import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 import 'wedding_screen.dart';
 
-class ReceptionScreen extends StatefulWidget {
+class DigitalReceptionScreen extends StatefulWidget {
   final bool isPreview;
-  const ReceptionScreen({super.key, this.isPreview = false});
+  const DigitalReceptionScreen({super.key, this.isPreview = false});
 
   @override
-  State<ReceptionScreen> createState() => _ReceptionScreenState();
+  State<DigitalReceptionScreen> createState() => _DigitalReceptionScreenState();
 }
 
-class _ReceptionScreenState extends State<ReceptionScreen> with SingleTickerProviderStateMixin {
+class _DigitalReceptionScreenState extends State<DigitalReceptionScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -33,7 +33,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> with SingleTickerProv
             if (widget.isPreview) {
               Navigator.of(context).pushReplacement(
                 PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => WeddingScreen(isPreview: widget.isPreview),
+                  pageBuilder: (context, animation, secondaryAnimation) => DigitalWeddingScreen(isPreview: widget.isPreview),
                   transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(opacity: animation, child: child),
                   transitionDuration: const Duration(milliseconds: 500),
                 ),
@@ -287,7 +287,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> with SingleTickerProv
 
                 // 3. Falling Names - Staggered letter-by-letter drop
                 _buildDroppingLetters(
-                  text: 'Akshay',
+                  text: 'Kaveri',
                   style: GoogleFonts.greatVibes(
                     fontSize: screenWidth * 0.15,
                     color: const Color(0xFFD4AF37), // Gold color
@@ -307,7 +307,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> with SingleTickerProv
                   overlapFactor: 4.0,
                 ),
                 _buildDroppingLetters(
-                  text: 'Krishna',
+                  text: 'Gangadhar',
                   style: GoogleFonts.greatVibes(
                     fontSize: screenWidth * 0.15,
                     color: const Color(0xFFD4AF37), // Gold color

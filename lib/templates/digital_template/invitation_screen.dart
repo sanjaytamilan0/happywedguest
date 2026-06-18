@@ -5,15 +5,15 @@ import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 import 'reception_screen.dart';
 
-class InvitationScreen extends StatefulWidget {
+class DigitalInvitationScreen extends StatefulWidget {
   final bool isPreview;
-  const InvitationScreen({super.key, this.isPreview = false});
+  const DigitalInvitationScreen({super.key, this.isPreview = false});
 
   @override
-  State<InvitationScreen> createState() => _InvitationScreenState();
+  State<DigitalInvitationScreen> createState() => _DigitalInvitationScreenState();
 }
 
-class _InvitationScreenState extends State<InvitationScreen> with SingleTickerProviderStateMixin {
+class _DigitalInvitationScreenState extends State<DigitalInvitationScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   
   // Monogram animations
@@ -71,7 +71,7 @@ class _InvitationScreenState extends State<InvitationScreen> with SingleTickerPr
             if (widget.isPreview) {
               Navigator.of(context).pushReplacement(
                 PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => ReceptionScreen(isPreview: widget.isPreview),
+                  pageBuilder: (context, animation, secondaryAnimation) => DigitalReceptionScreen(isPreview: widget.isPreview),
                   transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(opacity: animation, child: child),
                   transitionDuration: const Duration(milliseconds: 500),
                 ),
@@ -125,7 +125,7 @@ class _InvitationScreenState extends State<InvitationScreen> with SingleTickerPr
               
               // Main Names (Letter by Letter Wave with Rotation)
               _buildWavyText(
-                text: 'AKSHAY & KRISHNA',
+                text: 'KAVERI & GANGADHAR',
                 style: GoogleFonts.cinzel(
                   fontSize: screenWidth * 0.05,
                   fontWeight: FontWeight.w600,
@@ -142,7 +142,7 @@ class _InvitationScreenState extends State<InvitationScreen> with SingleTickerPr
               
               // Hashtag (Letter by Letter Wave with Opposite Rotation)
               _buildWavyText(
-                text: '#KRIAKSH WEDDING',
+                text: '#KAVEGAN WEDDING',
                 style: GoogleFonts.cinzel(
                   fontSize: screenWidth * 0.025,
                   fontWeight: FontWeight.w500,
@@ -281,7 +281,7 @@ class _InvitationScreenState extends State<InvitationScreen> with SingleTickerPr
         final monogramFontSize = screenWidth * 0.25;
 
         Widget letterA = Text(
-          'A',
+          'K',
           style: GoogleFonts.greatVibes(
             fontSize: monogramFontSize,
             foreground: Paint()..shader = linearGradient,
@@ -290,7 +290,7 @@ class _InvitationScreenState extends State<InvitationScreen> with SingleTickerPr
         );
 
         Widget letterK = Text(
-          'K',
+          'G',
           style: GoogleFonts.greatVibes(
             fontSize: monogramFontSize,
             foreground: Paint()..shader = linearGradient,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'invitation_screen.dart';
 
-class DigitalInvitationApp extends StatelessWidget {
+class AdvanceThemeApp extends StatelessWidget {
   final bool isPreview;
-  const DigitalInvitationApp({super.key, this.isPreview = false});
+  const AdvanceThemeApp({super.key, this.isPreview = false});
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +11,7 @@ class DigitalInvitationApp extends StatelessWidget {
       data: Theme.of(context).copyWith(
         scaffoldBackgroundColor: const Color(0xFFFCFAF5),
       ),
-      child: InvitationScreen(isPreview: isPreview),
+      child: AdvanceInvitationScreen(isPreview: isPreview),
     );
   }
 }

@@ -3,37 +3,38 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
-import 'wedding_screen.dart';
+import 'digital_invitation_app.dart';
 
-class ReceptionScreen extends StatefulWidget {
+class AdvanceWeddingScreen extends StatefulWidget {
   final bool isPreview;
-  const ReceptionScreen({super.key, this.isPreview = false});
+  const AdvanceWeddingScreen({super.key, this.isPreview = false});
 
   @override
-  State<ReceptionScreen> createState() => _ReceptionScreenState();
+  State<AdvanceWeddingScreen> createState() => _AdvanceWeddingScreenState();
 }
 
-class _ReceptionScreenState extends State<ReceptionScreen> with SingleTickerProviderStateMixin {
+class _AdvanceWeddingScreenState extends State<AdvanceWeddingScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
+    // Extended duration to 20 seconds so the final venue animation gets 5 full seconds
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 5500),
+      duration: const Duration(seconds: 20),
     );
 
     _controller.forward();
 
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Future.delayed(const Duration(milliseconds: 1000), () {
+        Future.delayed(const Duration(milliseconds: 2000), () {
           if (mounted) {
             if (widget.isPreview) {
               Navigator.of(context).pushReplacement(
                 PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => WeddingScreen(isPreview: widget.isPreview),
+                  pageBuilder: (context, animation, secondaryAnimation) => AdvanceThemeApp(isPreview: widget.isPreview),
                   transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(opacity: animation, child: child),
                   transitionDuration: const Duration(milliseconds: 500),
                 ),
@@ -162,61 +163,59 @@ class _ReceptionScreenState extends State<ReceptionScreen> with SingleTickerProv
       );
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
+    return Wrap(
+      alignment: WrapAlignment.center,
       children: letters,
     );
   }
 
-  // Animates the entire 5 text blocks: Slides from right, then bounces vertically (top to center)
-  Widget _buildSlidingLineFromRight({
-    required String text,
-    required TextStyle style,
+  Widget _buildSlidingUpwards({
+    required Widget child,
     required double startTime,
     required double endTime,
-    required double screenWidth,
+    required double slideDistance,
   }) {
-    // 60% of time sliding in horizontally, 40% of time bouncing vertically
-    final double slideDuration = (endTime - startTime) * 0.6;
-    final double slideEnd = startTime + slideDuration;
+    // Only straight move animation (no bounce/overshoot)
+    final Interval interval = Interval(startTime, endTime, curve: Curves.easeOut);
+    final Interval fadeInterval = Interval(startTime, endTime, curve: Curves.easeIn);
 
-    final Interval slideInterval = Interval(startTime, slideEnd, curve: Curves.easeOut);
-    final Interval fadeInterval = Interval(startTime, slideEnd, curve: Curves.easeIn);
-
-    // Slide from right
-    final Animation<Offset> slideAnim = Tween<Offset>(begin: Offset(screenWidth * 0.5, 0), end: Offset.zero).animate(
-      CurvedAnimation(parent: _controller, curve: slideInterval),
+    final Animation<Offset> slideAnim = Tween<Offset>(begin: Offset(0, slideDistance), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: interval),
     );
 
     final Animation<double> fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: fadeInterval),
     );
 
-    // Y-axis Bounce: Starts at 0, jumps up (negative Y) and bounces down to 0
-    final Animation<double> yBounceAnim = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: ConstantTween<double>(0.0), 
-        weight: 60, // Do nothing during the horizontal slide phase
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: -30.0, end: 0.0).chain(CurveTween(curve: Curves.bounceOut)), 
-        weight: 40, // Bounce vertically phase
-      ),
-    ]).animate(CurvedAnimation(parent: _controller, curve: Interval(startTime, endTime)));
-
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
         return Transform.translate(
-          // Combine horizontal slide with vertical bounce
-          offset: Offset(slideAnim.value.dx, yBounceAnim.value),
+          offset: slideAnim.value,
           child: Opacity(
             opacity: fadeAnim.value,
-            child: Text(text, style: style, textAlign: TextAlign.center),
+            child: child,
           ),
         );
       },
+      child: child,
+    );
+  }
+
+  Widget _buildDottedLine(double height) {
+    return SizedBox(
+      height: height,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(
+          10,
+          (index) => Container(
+            width: 2,
+            height: 2,
+            color: const Color(0xFF8C8665),
+          ),
+        ),
+      ),
     );
   }
 
@@ -237,7 +236,7 @@ class _ReceptionScreenState extends State<ReceptionScreen> with SingleTickerProv
           height: double.infinity,
           decoration: const BoxDecoration(
             image: DecorationImage(
-            image: AssetImage('assets/images/second.jpg.jpeg'),
+            image: AssetImage('assets/images/thirdbg.jpeg'),
             fit: BoxFit.cover,
           ),
         ),
@@ -248,52 +247,71 @@ class _ReceptionScreenState extends State<ReceptionScreen> with SingleTickerProv
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 1. Title (Reception) - Waves in first (0.0 to 0.25)
+                // 1. Title - Waves in first
                 _buildWavyText(
-                  text: 'Reception',
+                  text: 'Wedding Ceremony',
                   style: GoogleFonts.greatVibes(
                     fontSize: screenWidth * 0.15,
                     color: const Color(0xFF8C8665),
                     fontWeight: FontWeight.w500,
                   ),
                   startTime: 0.0,
-                  endTime: 0.25,
+                  endTime: 0.20,
                   rotationBegin: math.pi / 5,
                   slideDistance: slideDistance,
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: screenWidth * 0.05),
 
-                // 2. Subtitle - Waves in after title (0.25 to 0.5)
+                // 2. Subtitle Families
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                   child: _buildWavyText(
-                    text: "WE CORDIALLY INVITE YOU TO OUR SON'S RECEPTION CEREMONY PLEASE JOIN US",
+                    text: "THAKAR & OZA FAMILY",
                     style: GoogleFonts.cinzel(
-                      fontSize: screenWidth * 0.03,
+                      fontSize: screenWidth * 0.035,
                       color: const Color(0xFF8C8665),
                       fontWeight: FontWeight.w500,
-                      letterSpacing: 1.5,
-                      height: 1.5,
+                      letterSpacing: 2.0,
                     ),
-                    startTime: 0.25,
-                    endTime: 0.5,
+                    startTime: 0.20,
+                    endTime: 0.30,
                     rotationBegin: -math.pi / 5,
                     slideDistance: 30.0,
                     textAlign: TextAlign.center,
                   ),
                 ),
-                SizedBox(height: screenWidth * 0.08),
+                SizedBox(height: screenWidth * 0.02),
+                
+                // 3. Subtitle Invitation
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                  child: _buildWavyText(
+                    text: "INVITE YOU FOR A WEDDING CELEBRATION OF",
+                    style: GoogleFonts.cinzel(
+                      fontSize: screenWidth * 0.03,
+                      color: const Color(0xFF8C8665),
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.5,
+                    ),
+                    startTime: 0.30,
+                    endTime: 0.40,
+                    rotationBegin: -math.pi / 5,
+                    slideDistance: 30.0,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                SizedBox(height: screenWidth * 0.06),
 
-                // 3. Falling Names - Staggered letter-by-letter drop
+                // 4. Falling Names - Staggered letter-by-letter drop
                 _buildDroppingLetters(
-                  text: 'Akshay',
+                  text: 'Rohan',
                   style: GoogleFonts.greatVibes(
                     fontSize: screenWidth * 0.15,
-                    color: const Color(0xFFD4AF37), // Gold color
+                    color: const Color(0xFFD4AF37),
                   ),
-                  startTime: 0.5,
-                  endTime: 0.85, // Much slower drop
+                  startTime: 0.40,
+                  endTime: 0.65,
                   overlapFactor: 4.0, // Visible stagger A..k..s..h..
                 ),
                 _buildDroppingLetters(
@@ -302,87 +320,99 @@ class _ReceptionScreenState extends State<ReceptionScreen> with SingleTickerProv
                     fontSize: screenWidth * 0.08,
                     color: const Color(0xFF8C8665),
                   ),
-                  startTime: 0.5,
-                  endTime: 0.85, // Much slower drop
-                  overlapFactor: 4.0,
+                  startTime: 0.40,
+                  endTime: 0.65,
+                  overlapFactor: 4.0, 
                 ),
                 _buildDroppingLetters(
-                  text: 'Krishna',
+                  text: 'Priya',
                   style: GoogleFonts.greatVibes(
                     fontSize: screenWidth * 0.15,
-                    color: const Color(0xFFD4AF37), // Gold color
+                    color: const Color(0xFFD4AF37),
                   ),
-                  startTime: 0.5,
-                  endTime: 0.85, // Much slower drop
+                  startTime: 0.40,
+                  endTime: 0.65,
                   overlapFactor: 4.0, // Visible stagger K..r..i..s..
                 ),
                 SizedBox(height: screenWidth * 0.08),
 
-                // 4. Sliding Bottom Text - The 5 text blocks slide from right, then bounce vertically into place (0.75 to 1.0)
-                _buildSlidingLineFromRight(
-                  text: 'Tuesday, 19th July 2022',
-                  style: GoogleFonts.cinzel(
-                    fontSize: screenWidth * 0.05,
-                    color: const Color(0xFF8C8665),
-                    fontWeight: FontWeight.w500,
+                // 5. Date & Time Row - Sliding up from bottom of device ONLY after names sit
+                _buildSlidingUpwards(
+                  startTime: 0.65, // Starts exactly when names finish at 0.65
+                  endTime: 0.75,
+                  slideDistance: screenHeight, // Bottom of device
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Text('JULY', style: GoogleFonts.cinzel(fontSize: screenWidth * 0.04, color: const Color(0xFF8C8665))),
+                          Text('TUESDAY', style: GoogleFonts.cinzel(fontSize: screenWidth * 0.04, color: const Color(0xFF8C8665))),
+                        ],
+                      ),
+                      SizedBox(width: screenWidth * 0.04),
+                      _buildDottedLine(screenWidth * 0.1),
+                      SizedBox(width: screenWidth * 0.04),
+                      Text(
+                        '19',
+                        style: GoogleFonts.cinzel(fontSize: screenWidth * 0.15, color: const Color(0xFFD4AF37), fontWeight: FontWeight.w400, height: 1.0),
+                      ),
+                      SizedBox(width: screenWidth * 0.04),
+                      _buildDottedLine(screenWidth * 0.1),
+                      SizedBox(width: screenWidth * 0.04),
+                      Column(
+                        children: [
+                          Text('2022', style: GoogleFonts.cinzel(fontSize: screenWidth * 0.04, color: const Color(0xFF8C8665))),
+                          Text('AT 6:00 PM', style: GoogleFonts.cinzel(fontSize: screenWidth * 0.04, color: const Color(0xFF8C8665))),
+                        ],
+                      ),
+                    ],
                   ),
-                  startTime: 0.75,
-                  endTime: 0.90,
-                  screenWidth: fullWidth,
                 ),
-                SizedBox(height: screenWidth * 0.02),
-                
-                _buildSlidingLineFromRight(
-                  text: '8:30 pm Onwards',
+                SizedBox(height: screenWidth * 0.08),
+
+                // 6. Venue Header - Letter by letter sit animation over 5 seconds total for venue block
+                _buildDroppingLetters(
+                  text: ':: VENUE ::',
                   style: GoogleFonts.cinzel(
                     fontSize: screenWidth * 0.045,
                     color: const Color(0xFF8C8665),
                     fontWeight: FontWeight.w500,
                   ),
-                  startTime: 0.78,
-                  endTime: 0.92,
-                  screenWidth: fullWidth,
+                  startTime: 0.75,
+                  endTime: 0.85,
+                  overlapFactor: 4.0, // High stagger so they drop one by one
                 ),
                 SizedBox(height: screenWidth * 0.02),
                 
-                _buildSlidingLineFromRight(
-                  text: '@',
-                  style: GoogleFonts.cinzel(
-                    fontSize: screenWidth * 0.04,
-                    color: const Color(0xFF8C8665),
-                  ),
-                  startTime: 0.81,
-                  endTime: 0.94,
-                  screenWidth: fullWidth,
-                ),
-                SizedBox(height: screenWidth * 0.02),
-                
+                // 7. Venue Details - Letter by letter sit animation
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
-                  child: _buildSlidingLineFromRight(
-                    text: 'Krishna Resorts , opp. jain school',
+                  child: _buildDroppingLetters(
+                    text: 'KRISHNA RESORTS , OPP. JAIN SCHOOL',
                     style: GoogleFonts.cinzel(
-                      fontSize: screenWidth * 0.04,
+                      fontSize: screenWidth * 0.035,
                       color: const Color(0xFF8C8665),
                       fontWeight: FontWeight.w500,
                     ),
-                    startTime: 0.84,
-                    endTime: 0.97,
-                    screenWidth: fullWidth,
+                    startTime: 0.80,
+                    endTime: 0.95,
+                    overlapFactor: 4.0, // High stagger so they drop one by one
                   ),
                 ),
                 SizedBox(height: screenWidth * 0.01),
                 
-                _buildSlidingLineFromRight(
-                  text: 'Jakatnaka ,Surat.',
+                _buildDroppingLetters(
+                  text: 'JAKATNAKA ,SURAT.',
                   style: GoogleFonts.cinzel(
-                    fontSize: screenWidth * 0.04,
+                    fontSize: screenWidth * 0.035,
                     color: const Color(0xFF8C8665),
                     fontWeight: FontWeight.w500,
                   ),
-                  startTime: 0.87,
+                  startTime: 0.85,
                   endTime: 1.0,
-                  screenWidth: fullWidth,
+                  overlapFactor: 4.0, // High stagger so they drop one by one
                 ),
                 SizedBox(height: screenWidth * 0.1),
               ],

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
+import 'package:get/get.dart';
+import '../../routes/app_routes.dart';
+import 'digital_invitation_app.dart';
 
 class WeddingScreen extends StatefulWidget {
-  const WeddingScreen({super.key});
+  final bool isPreview;
+  const WeddingScreen({super.key, this.isPreview = false});
 
   @override
   State<WeddingScreen> createState() => _WeddingScreenState();
@@ -22,6 +26,24 @@ class _WeddingScreenState extends State<WeddingScreen> with SingleTickerProvider
     );
 
     _controller.forward();
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Future.delayed(const Duration(milliseconds: 2000), () {
+          if (mounted) {
+            if (widget.isPreview) {
+              Navigator.of(context).pushReplacement(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) => DigitalInvitationApp(isPreview: widget.isPreview),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(opacity: animation, child: child),
+                  transitionDuration: const Duration(milliseconds: 500),
+                ),
+              );
+            }
+          }
+        });
+      }
+    });
   }
 
   @override
