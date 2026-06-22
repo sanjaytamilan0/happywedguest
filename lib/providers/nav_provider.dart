@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum NavTab { links, home, profile, gallery }
+enum NavTab { dashboard, links, home, profile, gallery }
 
 class NavTabNotifier extends Notifier<NavTab> {
   @override

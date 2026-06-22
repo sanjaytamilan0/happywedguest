@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/nav_provider.dart';
+import '../providers/auth_provider.dart';
 
 class TopNavBar extends ConsumerWidget {
   const TopNavBar({super.key});
@@ -8,6 +9,7 @@ class TopNavBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentTab = ref.watch(navTabProvider);
+    final isLoggedIn = ref.watch(authProvider);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -27,6 +29,13 @@ class TopNavBar extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (isLoggedIn)
+              _NavItem(
+                title: 'DASHBOARD',
+                icon: Icons.dashboard,
+                tab: NavTab.dashboard,
+                currentTab: currentTab,
+              ),
             _NavItem(
               title: 'LINKS',
               icon: Icons.link,

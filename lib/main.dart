@@ -4,13 +4,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
+import 'providers/auth_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final sharedPreferences = await SharedPreferences.getInstance();
+
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+      ],
+      child: const MyApp(),
     ),
   );
 }

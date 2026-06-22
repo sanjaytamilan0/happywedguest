@@ -123,13 +123,13 @@ class _GalleryViewState extends State<GalleryView> {
       ),
       itemCount: 12, // Placeholder count
       itemBuilder: (context, index) {
-        final url = 'https://picsum.photos/seed/allpics$index/800/800';
+        final url = 'https://placehold.co/800x800/png?text=Pic+$index';
         return GestureDetector(
           onTap: () => Get.dialog(MediaFullScreenView(url: url, isVideo: false), useSafeArea: false),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.network(
-              'https://picsum.photos/seed/allpics$index/400/400',
+              'https://placehold.co/400x400/png?text=Pic+$index',
               fit: BoxFit.cover,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
@@ -168,7 +168,7 @@ class _GalleryViewState extends State<GalleryView> {
               fit: StackFit.expand,
               children: [
                 Image.network(
-                  'https://picsum.photos/seed/allvideos$index/400/400',
+                  'https://placehold.co/400x400/png?text=Video+$index',
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
@@ -291,13 +291,13 @@ class _GalleryViewState extends State<GalleryView> {
           ),
           itemCount: 8, // Placeholder count
           itemBuilder: (context, index) {
-            final url = 'https://picsum.photos/seed/${_selectedFolder!.replaceAll(' ', '')}$index/800/800';
+            final url = 'https://placehold.co/800x800/png?text=${_selectedFolder!.replaceAll(' ', '+')}+$index';
             return GestureDetector(
               onTap: () => Get.dialog(MediaFullScreenView(url: url, isVideo: false), useSafeArea: false),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  'https://picsum.photos/seed/${_selectedFolder!.replaceAll(' ', '')}$index/400/400',
+                  'https://placehold.co/400x400/png?text=${_selectedFolder!.replaceAll(' ', '+')}+$index',
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;

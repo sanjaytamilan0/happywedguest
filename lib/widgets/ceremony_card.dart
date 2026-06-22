@@ -92,7 +92,7 @@ class _CeremonyCardState extends ConsumerState<CeremonyCard> with SingleTickerPr
                   ],
                   image: const DecorationImage(
                     image: NetworkImage(
-                      'https://picsum.photos/seed/wedding/800/600',
+                      'https://placehold.co/800x600/png?text=Wedding',
                     ),
                     fit: BoxFit.cover,
                   ),
