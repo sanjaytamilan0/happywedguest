@@ -29,19 +29,12 @@ class TopNavBar extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (isLoggedIn)
-              _NavItem(
-                title: 'DASHBOARD',
-                icon: Icons.dashboard,
-                tab: NavTab.dashboard,
-                currentTab: currentTab,
-              ),
-            _NavItem(
-              title: 'LINKS',
-              icon: Icons.link,
-              tab: NavTab.links,
-              currentTab: currentTab,
-            ),
+            // _NavItem(
+            //   title: 'INVITATIONS',
+            //   icon: Icons.link,
+            //   tab: NavTab.links,
+            //   currentTab: currentTab,
+            // ),
             _NavItem(
               title: 'HOME',
               icon: Icons.home,
@@ -55,7 +48,7 @@ class TopNavBar extends ConsumerWidget {
               currentTab: currentTab,
             ),
             _NavItem(
-              title: 'GALLERY',
+              title: 'INVITATIONS', // Renamed from GALLERY
               icon: Icons.image,
               tab: NavTab.gallery,
               currentTab: currentTab,

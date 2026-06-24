@@ -2,98 +2,63 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
-import '../templates/basic_template/digital_invitation_app.dart';
-import '../templates/digital_template/digital_invitation_app.dart';
-import '../templates/advance_template/digital_invitation_app.dart';
-import '../templates/multiview_template/multiview_app.dart';
 
-class LinksView extends StatelessWidget {
+// Basic
+import '../templates/basic_template/digital_invitation_app.dart' as basic_inv;
+import '../templates/basic_template/reception_screen.dart' as basic_rec;
+import '../templates/basic_template/wedding_screen.dart' as basic_wed;
+
+// Digital
+import '../templates/digital_template/digital_invitation_app.dart' as digital_inv;
+import '../templates/digital_template/reception_screen.dart' as digital_rec;
+import '../templates/digital_template/wedding_screen.dart' as digital_wed;
+
+// Advance
+import '../templates/advance_template/digital_invitation_app.dart' as advance_inv;
+import '../templates/advance_template/reception_screen.dart' as advance_rec;
+import '../templates/advance_template/wedding_screen.dart' as advance_wed;
+
+// Multiview
+import '../templates/multiview_template/multiview_app.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/nav_provider.dart';
+import '../widgets/template_preview_list.dart';
+
+class LinksView extends ConsumerStatefulWidget {
   final bool isDesktop;
 
   const LinksView({super.key, required this.isDesktop});
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isDesktop ? 64.0 : 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isDesktop ? 3 : 1,
-              childAspectRatio: isDesktop ? 0.55 : 0.6, // Perfect phone aspect ratio
-              crossAxisSpacing: 32,
-              mainAxisSpacing: 48,
-            ),
-            itemCount: 4, // Show 4 live preview cards
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return _buildLivePreviewCard(
-                  context,
-                  title: 'Kunal & Simran',
-                  appWidget: const MultiviewThemeApp(isPreview: true),
-                  route: AppRoutes.MULTIVIEW_INVITATION,
-                );
-              } else if (index == 1) {
-                return _buildLivePreviewCard(
-                  context,
-                  title: 'Akshay & Krishna',
-                  appWidget: const DigitalInvitationApp(isPreview: true),
-                  route: AppRoutes.INVITATION,
-                );
-              } else if (index == 2) {
-                return _buildLivePreviewCard(
-                  context,
-                  title: 'Kaveri & Gangadhar',
-                  appWidget: const DigitalThemeApp(isPreview: true),
-                  route: AppRoutes.DIGITAL_INVITATION,
-                );
-              } else {
-                return _buildLivePreviewCard(
-                  context,
-                  title: 'Rohan & Priya',
-                  appWidget: const AdvanceThemeApp(isPreview: true),
-                  route: AppRoutes.ADVANCE_INVITATION,
-                );
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
+  ConsumerState<LinksView> createState() => _LinksViewState();
+}
 
-  Widget _buildLivePreviewCard(
-    BuildContext context, {
-    required String title,
-    required Widget appWidget,
-    required String route,
-  }) {
+class _LinksViewState extends ConsumerState<LinksView> {
+  Widget _buildTemplateOption(BuildContext context, {required String title, required Widget child, required String templateId}) {
+    final size = MediaQuery.of(context).size;
+    final double screenWidth = size.width > size.height ? size.height * 0.5 : size.width;
+    
     return GestureDetector(
-      onTap: () => Get.toNamed(route),
+      onTap: () {
+        ref.read(selectedTemplateProvider.notifier).setTemplate(templateId);
+      },
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
+          SizedBox(
+            width: screenWidth,
+            height: 600,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
-              child: AbsorbPointer(
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  alignment: Alignment.topCenter,
-                  child: SizedBox(
-                    width: 400,
-                    height: 800,
-                    child: Navigator(
-                      onGenerateRoute: (settings) {
-                        return MaterialPageRoute(
-                          builder: (_) => appWidget,
-                        );
-                      },
-                    ),
+              child: Theme(
+                data: ThemeData(scaffoldBackgroundColor: const Color(0xFFFCFAF5)),
+                child: AbsorbPointer(
+                  child: Navigator(
+                    key: ValueKey(templateId),
+                    onGenerateRoute: (settings) {
+                      return MaterialPageRoute(
+                        builder: (_) => child,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -103,7 +68,7 @@ class LinksView extends StatelessWidget {
           Text(
             title,
             style: GoogleFonts.montserrat(
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
@@ -111,6 +76,67 @@ class LinksView extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final _selectedTemplate = ref.watch(selectedTemplateProvider);
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: widget.isDesktop ? 64.0 : 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 24),
+          if (_selectedTemplate != null) ...[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                label: Text('Back to Invitations', style: GoogleFonts.montserrat(color: Colors.black87, fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  ref.read(selectedTemplateProvider.notifier).setTemplate(null);
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+            TemplatePreviewList(templateId: _selectedTemplate),
+          ] else ...[
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 24,
+              runSpacing: 48,
+              children: [
+                _buildTemplateOption(
+                  context,
+                  title: 'Kunal & Simran',
+                  child: const MultiviewThemeApp(isPreview: true),
+                  templateId: 'multiview',
+                ),
+                _buildTemplateOption(
+                  context,
+                  title: 'Akshay & Krishna',
+                  child: const basic_inv.DigitalInvitationApp(isPreview: true),
+                  templateId: 'basic',
+                ),
+                _buildTemplateOption(
+                  context,
+                  title: 'Kaveri & Gangadhar',
+                  child: const digital_inv.DigitalThemeApp(isPreview: true),
+                  templateId: 'digital',
+                ),
+                _buildTemplateOption(
+                  context,
+                  title: 'Rohan & Priya',
+                  child: const advance_inv.AdvanceThemeApp(isPreview: true),
+                  templateId: 'advance',
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 48),
         ],
       ),
     );

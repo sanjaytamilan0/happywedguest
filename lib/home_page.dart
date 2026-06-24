@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'providers/nav_provider.dart';
 import 'widgets/top_nav.dart';
+import 'widgets/rsvp_card.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'views/home_view.dart';
 import 'views/profile_view.dart';
 import 'views/gallery_view.dart';
@@ -23,7 +25,8 @@ class HomePage extends ConsumerWidget {
     final isMobilePlatform = Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android;
 
     return Scaffold(
-      bottomNavigationBar: isMobilePlatform ? _buildBottomNavBar(currentTab, isLoggedIn, ref) : null,
+      // bottomNavigationBar: isMobilePlatform ? _buildBottomNavBar(currentTab, isLoggedIn, ref) : null,
+      bottomNavigationBar: null,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -42,19 +45,19 @@ class HomePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Header Logo / Text
-                      if (!isMobilePlatform || currentTab == NavTab.home) ...[
-                        _buildHeader(),
+                      // Header Logo / Text moved to RsvpCard
+        
+                      // Top Pill Navigation
+                      // if (!isMobilePlatform) ...[
+                      //   const TopNavBar(),
+                      //   const SizedBox(height: 48),
+                      // ],
+        
+                      if (currentTab == NavTab.home) ...[
+                        const RsvpCard(guestName: 'sanjay'),
                         const SizedBox(height: 32),
                       ],
         
-                      // Top Pill Navigation
-                      if (!isMobilePlatform) ...[
-                        const TopNavBar(),
-                        const SizedBox(height: 48),
-                      ],
-        
-                      // Responsive Main Content Layout
                       Builder(
                         builder: (context) {
                           switch (currentTab) {
@@ -74,28 +77,168 @@ class HomePage extends ConsumerWidget {
                     ],
                   ),
                 ),
-                // Login / Logout Button at Top Right
-                if (!(isMobilePlatform && isLoggedIn))
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (isLoggedIn) {
-                          _showLogoutConfirmationDialog(context, ref);
-                        } else {
-                          _showLoginDialog(context, ref);
-                        }
-                      },
-                      icon: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 18),
-                      label: Text(isLoggedIn ? 'Logout' : 'Login'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD83076),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                // Top Right Action Row
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: Row(
+                    children: [
+                        if (currentTab == NavTab.gallery && ref.watch(isInvitationSelectedProvider))
+                          PopupMenuButton<String>(
+                            icon: const Icon(Icons.help_outline, color: Colors.grey),
+                            tooltip: 'Help & Contact',
+                            offset: const Offset(0, 48),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            color: Colors.white,
+                            elevation: 4,
+                            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                              PopupMenuItem<String>(
+                                value: 'contact',
+                                child: Container(
+                                  width: 220,
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                        'Need Help?',
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      InkWell(
+                                        onTap: () async {
+                                          final url = Uri.parse('tel:+919876543210');
+                                          if (await canLaunchUrl(url)) {
+                                            await launchUrl(url);
+                                          }
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 4),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(6),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue.withAlpha(25),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(Icons.phone, color: Colors.blue, size: 16),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              const Text('+91 98765 43210', style: TextStyle(fontSize: 13)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      InkWell(
+                                        onTap: () async {
+                                          final url = Uri.parse('https://wa.me/919876543210');
+                                          if (await canLaunchUrl(url)) {
+                                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                                          }
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 4),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(6),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green.withAlpha(25),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(Icons.chat, color: Colors.green, size: 16),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              const Text('WhatsApp Us', style: TextStyle(fontSize: 13)),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        PopupMenuButton<String>(
+                          icon: const Icon(Icons.notifications_none, color: Colors.grey),
+                          tooltip: 'Notifications',
+                          offset: const Offset(0, 48),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          color: Colors.white,
+                          elevation: 4,
+                          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                            PopupMenuItem<String>(
+                              value: 'notification',
+                              child: Container(
+                                width: 250,
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.mail_outline, color: Color(0xFFD83076), size: 20),
+                                        const SizedBox(width: 8),
+                                        const Text(
+                                          'New Invitation!',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    const Text(
+                                      'You have been invited to Akshay & Krishna\'s Wedding.',
+                                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                        if (currentTab == NavTab.profile)
+                          IconButton(
+                            icon: const Icon(Icons.home, color: Colors.grey),
+                            tooltip: 'Home',
+                            onPressed: () {
+                              ref.read(navTabProvider.notifier).setTab(NavTab.home);
+                            },
+                          )
+                        else
+                          IconButton(
+                            icon: const Icon(Icons.person, color: Colors.grey),
+                            tooltip: 'Profile',
+                            onPressed: () {
+                              ref.read(navTabProvider.notifier).setTab(NavTab.profile);
+                            },
+                          ),
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            if (isLoggedIn) {
+                              _showLogoutConfirmationDialog(context, ref);
+                            } else {
+                              _showLoginDialog(context, ref);
+                            }
+                          },
+                          icon: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 18),
+                          label: Text(isLoggedIn ? 'Logout' : 'Login'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFD83076),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
               ],
@@ -108,15 +251,6 @@ class HomePage extends ConsumerWidget {
 
   Widget _buildBottomNavBar(NavTab currentTab, bool isLoggedIn, WidgetRef ref) {
     final items = <BottomNavigationBarItem>[
-      if (isLoggedIn)
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard),
-          label: 'Dashboard',
-        ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.link),
-        label: 'Links',
-      ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.home),
         label: 'Home',
@@ -127,23 +261,14 @@ class HomePage extends ConsumerWidget {
       ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.image),
-        label: 'Gallery',
+        label: 'Invitations',
       ),
     ];
 
     int currentIndex = 0;
-    if (isLoggedIn) {
-      if (currentTab == NavTab.dashboard) currentIndex = 0;
-      else if (currentTab == NavTab.links) currentIndex = 1;
-      else if (currentTab == NavTab.home) currentIndex = 2;
-      else if (currentTab == NavTab.profile) currentIndex = 3;
-      else if (currentTab == NavTab.gallery) currentIndex = 4;
-    } else {
-      if (currentTab == NavTab.links) currentIndex = 0;
-      else if (currentTab == NavTab.home) currentIndex = 1;
-      else if (currentTab == NavTab.profile) currentIndex = 2;
-      else if (currentTab == NavTab.gallery) currentIndex = 3;
-    }
+    if (currentTab == NavTab.home) currentIndex = 0;
+    else if (currentTab == NavTab.profile) currentIndex = 1;
+    else if (currentTab == NavTab.gallery) currentIndex = 2;
 
     return BottomNavigationBar(
       currentIndex: currentIndex,
@@ -152,23 +277,11 @@ class HomePage extends ConsumerWidget {
       unselectedItemColor: Colors.grey[600],
       onTap: (index) {
         NavTab selectedTab;
-        if (isLoggedIn) {
-          switch (index) {
-            case 0: selectedTab = NavTab.dashboard; break;
-            case 1: selectedTab = NavTab.links; break;
-            case 2: selectedTab = NavTab.home; break;
-            case 3: selectedTab = NavTab.profile; break;
-            case 4: selectedTab = NavTab.gallery; break;
-            default: selectedTab = NavTab.home;
-          }
-        } else {
-          switch (index) {
-            case 0: selectedTab = NavTab.links; break;
-            case 1: selectedTab = NavTab.home; break;
-            case 2: selectedTab = NavTab.profile; break;
-            case 3: selectedTab = NavTab.gallery; break;
-            default: selectedTab = NavTab.home;
-          }
+        switch (index) {
+          case 0: selectedTab = NavTab.home; break;
+          case 1: selectedTab = NavTab.profile; break;
+          case 2: selectedTab = NavTab.gallery; break;
+          default: selectedTab = NavTab.home;
         }
         ref.read(navTabProvider.notifier).setTab(selectedTab);
       },
@@ -176,48 +289,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.diamond_outlined, size: 16, color: Colors.amber[700]),
-            const SizedBox(width: 8),
-            Icon(Icons.favorite, size: 16, color: Colors.amber[700]),
-            const SizedBox(width: 8),
-            Icon(Icons.diamond_outlined, size: 16, color: Colors.amber[700]),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Udaya',
-          style: GoogleFonts.greatVibes(
-            fontSize: 64,
-            color: const Color(0xFFD83076),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Celebrating the Union of',
-          style: GoogleFonts.lora(
-            fontSize: 18,
-            fontStyle: FontStyle.italic,
-            color: Colors.grey[800],
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '&',
-          style: GoogleFonts.greatVibes(
-            fontSize: 24,
-            color: Colors.grey[800],
-          ),
-        ),
-      ],
-    );
-  }
+
 
   void _showLogoutConfirmationDialog(BuildContext context, WidgetRef ref) {
     final isMobilePlatform = Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android;

@@ -231,7 +231,9 @@ class _AdvanceReceptionScreenState extends State<AdvanceReceptionScreen> with Si
     final double slideDistance = screenHeight * 0.3;
 
     return Scaffold(
-      body: Center(
+      body: Stack(
+        children: [
+          Center(
         child: Container(
           width: screenWidth,
           height: double.infinity,
@@ -391,6 +393,27 @@ class _AdvanceReceptionScreenState extends State<AdvanceReceptionScreen> with Si
         ),
       ),
       ),
+      ),
+          if (Navigator.of(context).canPop())
+            Positioned(
+              top: 16,
+              right: 16,
+              child: SafeArea(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.black87),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

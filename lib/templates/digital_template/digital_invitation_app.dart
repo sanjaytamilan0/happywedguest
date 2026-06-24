@@ -3,7 +3,7 @@ import 'invitation_screen.dart';
 
 class DigitalThemeApp extends StatelessWidget {
   final bool isPreview;
-  const DigitalThemeApp({super.key, this.isPreview = false});
+  const DigitalThemeApp({super.key, this.isPreview = true});
 
   @override
   Widget build(BuildContext context) {

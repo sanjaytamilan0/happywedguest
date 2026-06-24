@@ -64,13 +64,25 @@ class _MediaFullScreenViewState extends State<MediaFullScreenView> {
   Future<void> _downloadMedia() async {
     if (kIsWeb) {
       try {
-        final anchor = html.AnchorElement(href: widget.url)
-          ..setAttribute("download", "wedding_memory.jpg")
-          ..target = "blank";
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Starting download...')),
+        );
+        
+        final response = await html.window.fetch(widget.url);
+        final blob = await response.blob();
+        final blobUrl = html.Url.createObjectUrlFromBlob(blob);
+        
+        final anchor = html.AnchorElement(href: blobUrl)
+          ..setAttribute("download", widget.isVideo ? "wedding_video.mp4" : "wedding_memory.jpg")
+          ..style.display = "none";
+          
+        html.document.body?.children.add(anchor);
         anchor.click();
+        html.document.body?.children.remove(anchor);
+        html.Url.revokeObjectUrl(blobUrl);
         return;
       } catch (e) {
-        // Fallback to URL launch if HTML anchor fails
+        // Fallback to URL launch if Blob fetch fails
       }
     }
 

@@ -89,9 +89,13 @@ class _HostFamilySectionState extends State<HostFamilySection> with SingleTicker
       );
     }
 
-    return Wrap(
-      alignment: textAlign == TextAlign.center ? WrapAlignment.center : WrapAlignment.start,
-      children: letters,
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: textAlign == TextAlign.center ? MainAxisAlignment.center : MainAxisAlignment.start,
+        children: letters,
+      ),
     );
   }
 
@@ -141,9 +145,13 @@ class _HostFamilySectionState extends State<HostFamilySection> with SingleTicker
       );
     }
 
-    return Wrap(
-      alignment: WrapAlignment.center,
-      children: letters,
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: letters,
+      ),
     );
   }
 

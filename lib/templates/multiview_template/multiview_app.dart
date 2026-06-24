@@ -333,7 +333,9 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
     const goldColor = Color(0xFFB8860B);
 
     return Scaffold(
-      body: Container(
+      body: Stack(
+        children: [
+          Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
@@ -367,8 +369,9 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                     ),
                   );
                 },
-                child: Column(
-                  children: [
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
                     const SizedBox(height: 60),
                     // Logo/Monogram Animation
                     Stack(
@@ -604,8 +607,9 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                   ],
                 ),
               ),
+            ),
 
-              // --- PHASE 3 & 4 (New Image Text Details + Final Exit) ---
+            // --- PHASE 3 & 4 (New Image Text Details + Final Exit) ---
               AnimatedBuilder(
                 animation: _finalOutroController,
                 builder: (context, child) {
@@ -626,9 +630,10 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                     position: _detailsSlideAnimation,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
                         // Ganesha Logo Placeholder
                         const Icon(Icons.brightness_5, color: Color(0xFFD4AF37), size: 40),
                         const SizedBox(height: 10),
@@ -711,6 +716,7 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                   ),
                 ),
                 ),
+                ),
               ),
 
               // --- PHASE 5 & 6 (Carnival Screen + Exit) ---
@@ -732,7 +738,8 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                   opacity: _carnivalFade,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
+                    child: SingleChildScrollView(
+                      child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SlideTransition(
@@ -810,6 +817,7 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                         ),
                       ],
                     ),
+                    ),
                   ),
                 ),
               ),
@@ -832,7 +840,8 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                   opacity: _swadFade,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
+                    child: SingleChildScrollView(
+                      child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SlideTransition(
@@ -910,6 +919,7 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                         ),
                       ],
                     ),
+                    ),
                   ),
                 ),
               ),
@@ -930,7 +940,8 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                   // RSVP Text Content
                   Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
+                child: SingleChildScrollView(
+                  child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     FadeTransition(
@@ -1036,6 +1047,7 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
                     ),
                   ],
                 ),
+                ),
               ),
             ],
           ),
@@ -1043,7 +1055,28 @@ class _InviteScreenState extends State<InviteScreen> with TickerProviderStateMix
       ),
     ),
   ),
-);
+          if (Navigator.of(context).canPop())
+            Positioned(
+              top: 16,
+              right: 16,
+              child: SafeArea(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.black87),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
 
